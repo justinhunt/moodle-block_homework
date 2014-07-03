@@ -57,4 +57,5 @@ function xmldb_block_homework_upgrade($oldversion) {
         // Homework savepoint reached.
         upgrade_block_savepoint(true, 2014063000, 'homework');
     }
+	return true;
 }

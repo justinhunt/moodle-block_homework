@@ -70,21 +70,38 @@ if (!empty($notificationerror)) {
 
 $communitymanager = new block_community_manager();
 */
+
 $renderer = $PAGE->get_renderer('block_homework');
-$bmh = new block_homework_manager();
+$bmh = new block_homework_manager($courseid);
 
 // OUTPUT
 echo $OUTPUT->header();
-
 $message=false;
 
+//only admins and editing teachers should get here really
+if(!has_capability('block/homework:managehomeworks', $context) ){
+	echo $OUTPUT->heading(get_string('inadequatepermissions', 'block_homework'), 3, 'main');
+	echo $OUTPUT->footer();
+	return;
+ }
+
+
 //don't do anything without a groupid
-if($groupid == 0){$action='group';}
+if($groupid == 0){
+	$action='group';
+}else{		
+	$groupname = groups_get_group_name($groupid);
+	if(!$groupname){
+		$message = get_string('invalidgroupid','block_homework');
+		$action='group';
+	}
+}
+
 
 switch($action){
 	
 	case 'add':
-		echo $OUTPUT->heading(get_string('addhomework', 'block_homework'), 3, 'main');
+		echo $OUTPUT->heading(get_string('addhomeworkheading', 'block_homework',$groupname), 3, 'main');
 		$addform = new block_homework_add_form(null,array('groupid'=>$groupid));
 		$addform->display();
 		echo $OUTPUT->footer();
@@ -93,7 +110,7 @@ switch($action){
 
 	
 	case 'edit':
-		echo $OUTPUT->heading(get_string('edithomeworkheading', 'block_homework',$groupid), 3, 'main');
+		echo $OUTPUT->heading(get_string('edithomeworkheading', 'block_homework',$groupname), 3, 'main');
 		$editform = new block_homework_edit_form(null,array('groupid'=>$groupid));
 
 		if($homeworkid > 0){
@@ -113,7 +130,7 @@ switch($action){
 
 	
 	case 'delete':
-		echo $OUTPUT->heading(get_string('deletehomeworkheading', 'block_homework',$groupid), 3, 'main');
+		echo $OUTPUT->heading(get_string('deletehomeworkheading', 'block_homework',$groupname), 3, 'main');
 		$deleteform = new block_homework_delete_form(null,array('groupid'=>$groupid));
 		
 		if($homeworkid > 0){
@@ -137,11 +154,18 @@ switch($action){
 		return;
 		
 	case 'group':
+		//might have been possible to use moodle groups dropdown
+		//http://docs.moodle.org/dev/Groups_API see groups_print_activity_menu
+	
+		//if we have a status message, display it.
+		if($message){
+			echo $OUTPUT->heading($message,5,'main');
+		}
 		echo $OUTPUT->heading(get_string('selectgroup', 'block_homework'), 3, 'main');
 		$gdata = new stdClass();
 		$gdata->courseid=$courseid;
 		$gdata->groupid=$groupid;
-		$groupform = new block_homework_group_form();
+		$groupform = new block_homework_group_form(null,array('courseid'=>$courseid));
 		$groupform->set_data($gdata);
 		$groupform->display();
 		echo $OUTPUT->footer();
@@ -149,8 +173,6 @@ switch($action){
 
 	
 	case 'doadd':
-		//To do. here collect the data from the form and update in the db using. maybe
-		$bmh = new block_homework_manager();
 		//get add form
 		$add_form = new block_homework_add_form();
 		//print_r($add_form);
@@ -164,8 +186,6 @@ switch($action){
 		break;
 		
 	case 'doedit':
-		//To do. here collect the data from the form and update in the db using. maybe
-		$bmh = new block_homework_manager();
 		//get add form
 		$edit_form = new block_homework_edit_form();
 		//print_r($add_form);
@@ -210,8 +230,7 @@ switch($action){
 	if($message){
 		echo $OUTPUT->heading($message,5,'main');
 	}
-	
-	$groupname = groups_get_group_name($groupid);
+
 	echo $OUTPUT->heading(get_string('homeworklist', 'block_homework', $groupname), 3, 'main');
 	
 	//group form
@@ -229,7 +248,7 @@ switch($action){
 	if($homeworkdata){
 		echo show_homework_list($homeworkdata,$courseid,$groupid);
 	}else{
-		echo $OUTPUT->heading( get_string('nohomeworks','block_homework',$groupid),4,'main');
+		echo $OUTPUT->heading( get_string('nohomeworks','block_homework',$groupname),4,'main');
 	}
 	echo show_buttons($groupid, $groupname);
 	echo $OUTPUT->footer();

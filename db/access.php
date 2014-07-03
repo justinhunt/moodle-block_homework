@@ -18,34 +18,45 @@
  * homework block caps.
  *
  * @package   block_homework
- * @copyright Daniel Neis <danielneis@gmail.com>
+ * @copyright Justin Hunt <poodllsupport@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = array(
+		$capabilities = array(
 
-    'block/homework:myaddinstance' => array(
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array(
-            'user' => CAP_ALLOW
-        ),
+			'block/homework:myaddinstance' => array(
+				'captype' => 'write',
+				'contextlevel' => CONTEXT_SYSTEM,
+				'archetypes' => array(
+					'user' => CAP_ALLOW
+				),
 
-        'clonepermissionsfrom' => 'moodle/my:manageblocks'
-    ),
+				'clonepermissionsfrom' => 'moodle/my:manageblocks'
+			),
 
-    'block/homework:addinstance' => array(
-        'riskbitmask' => RISK_SPAM | RISK_XSS,
+			'block/homework:addinstance' => array(
+				'riskbitmask' => RISK_SPAM | RISK_XSS,
+				'captype' => 'write',
+				'contextlevel' => CONTEXT_BLOCK,
+				'archetypes' => array(
+					'editingteacher' => CAP_ALLOW,
+					'manager' => CAP_ALLOW
+				),
 
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_BLOCK,
-        'archetypes' => array(
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        ),
-
-        'clonepermissionsfrom' => 'moodle/site:manageblocks'
-    ),
-);
+				'clonepermissionsfrom' => 'moodle/site:manageblocks'
+			),
+			
+			'block/homework:managehomeworks' => array(
+				'riskbitmask' => RISK_SPAM | RISK_XSS,
+				'captype' => 'write',
+				'contextlevel' => CONTEXT_COURSE,
+				'archetypes' => array(
+					'editingteacher' => CAP_ALLOW,
+					'manager' => CAP_ALLOW
+				),
+				
+				'clonepermissionsfrom' => 'moodle/site:manageblocks'
+			),
+		);

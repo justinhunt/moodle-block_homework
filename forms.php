@@ -41,9 +41,10 @@ class block_homework_add_form extends moodleform {
         $mform = & $this->_form;
 
 		$groupid = $this->_customdata['groupid'];
-		$groupname = groups_get_group_name($groupid);
+		//$groupname = groups_get_group_name($groupid);
 		
-        $mform->addElement('header', 'site', get_string($this->action . 'homeworkheading', 'block_homework',$groupname));
+		
+       // $mform->addElement('header', 'site', get_string($this->action . 'homeworkheading', 'block_homework',$groupname));
 
         //add the course id (of the context)
         $mform->addElement('date_selector', 'startdate', get_string('startdate','block_homework'));
@@ -135,14 +136,18 @@ class block_homework_delete_form extends moodleform {
         $mform = & $this->_form;
 
 		$groupid = $this->_customdata['groupid'];
-		$groupname = groups_get_group_name($groupid);
-        $mform->addElement('header', 'site', get_string('deletehomework', 'block_homework', $groupname));
+	//	$groupname = groups_get_group_name($groupid);
+		
+      //  $mform->addElement('header', 'site', get_string('deletehomework', 'block_homework', $groupname));
 		
 		$mform->addElement('hidden', 'homeworkid', 0);
         $mform->setType('homeworkid', PARAM_INT);
 		
 		$mform->addElement('hidden', 'courseid', 0);
         $mform->setType('courseid', PARAM_INT);
+		
+		$mform->addElement('hidden', 'groupid', $groupid);
+        $mform->setType('groupid', PARAM_INT);
 		
 		$mform->addElement('static', 'startdate', get_string('startdate','block_homework'));
 		$mform->addElement('static', 'activityname', get_string('homeworkactivity','block_homework'));
@@ -162,7 +167,7 @@ class block_homework_group_form extends moodleform {
         global $CFG, $USER, $OUTPUT, $COURSE;
         $strrequired = get_string('required');
         $mform = & $this->_form;
-		$bmh = new block_homework_manager();
+		$bmh = new block_homework_manager($this->_customdata['courseid']);
 
 		$mform->addElement('hidden', 'courseid', 0);
         $mform->setType('courseid', PARAM_INT);

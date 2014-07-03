@@ -18,14 +18,31 @@
  * Community library
  *
  * @package    block_homework
- * @author     Jerome Mouneyrac <jerome@mouneyrac.com>
+ * @author     Justin Hunt <poodllsupport@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL
- * @copyright  (C) 1999 onwards Martin Dougiamas  http://dougiamas.com
+ * @copyright  (C) 2014 onwards Justin Hunt
  *
  *
  */
 
 class block_homework_manager {
+
+	private $courseid=0;
+	private $course=null;
+	
+	/**
+     * constructor. make sure we have the right course
+     * @param integer courseid id
+	*/
+	function block_homework_manager($courseid=0) {
+		global $COURSE;
+		if($courseid){
+        $this->courseid=$courseid;
+		}else{
+			$this->courseid = $COURSE->id; 
+			$this->course = $COURSE;
+		}
+    }
 
     /**
      * Add a homework activity
@@ -36,7 +53,7 @@ class block_homework_manager {
     public function block_homework_add_homework($groupid, $courseid, $cmid, $startdate) {
         global $DB,$USER;
 
-        $homework = $this->block_homework_get_homework($groupid, $cmid);
+       // $homework = $this->block_homework_get_homework($groupid, $cmid);
         if (empty($homework)) {
             $homework = new stdClass();
             $homework->groupid = $groupid;
@@ -69,13 +86,51 @@ class block_homework_manager {
     }
 
     /**
-     * Return all homeworks for a group
+     * Return all homeworks for a group in a given course
      * @param integer $groupid
      * @return array of course
      */
     public function block_homework_get_homeworks($groupid, $courseid) {
         global $DB;
-        return $DB->get_records('block_homework', array('groupid' => $groupid));
+        return $DB->get_records('block_homework', array('groupid' => $groupid,'courseid'=>$courseid));
+    }
+	
+	 /**
+     * Return all current homeworks for a group in a given course
+     * @param integer $groupid
+     * @return array of course
+     */
+    public function block_homework_get_live_homeworks($courseid,$groupid) {
+        global $DB;
+		$select = "groupid = $groupid AND courseid = $courseid AND startdate >= " . time(); //where clause
+		$table = 'block_homework';
+		return $DB->get_records_select($table,$select);
+    }
+	
+	/**
+     * Check if an activity has been completed
+     * @param object $cm The course module
+	 * @param integer $userid pass in to check X user, blank to use current user 
+     * @return boolean true:complete false:incomplete
+     */
+	public function activity_is_complete($cm, $userid = 0){
+        global $USER,$DB;
+		if($userid==0){
+			$userid=$USER->id;
+		}
+		
+		//if we do not have a course object, get one.
+		if(!$this->course){
+			$this->course = $DB->get_record('course', array('id'=>$this->courseid));
+		}
+        
+		// Get current completion state
+        $completion = new completion_info($this->course);
+        $data = $completion->get_data($cm, false, $userid);
+
+        // Is the activity already complete
+        $completed= $data->viewed == COMPLETION_VIEWED;    
+        return $completed;
     }
 
     /**
@@ -105,8 +160,8 @@ class block_homework_manager {
     }
 	
 	function block_homework_get_grouplist(){
-		global $COURSE,$USER;
-		$groups = groups_get_all_groups($COURSE->id);
+		global $USER;
+		$groups = groups_get_all_groups($this->courseid);
 		return $groups;
 	}
 	
@@ -125,51 +180,62 @@ class block_homework_manager {
      * Fetch all (visible) activities in course for use in a list 
      * @return bool true
      */
-	  function block_homework_fetch_activities() {
+	  function block_homework_fetch_activities($groupid = 0) {
         global $CFG, $DB, $OUTPUT;
-
-        $course = $this->page->course;
 
         require_once($CFG->dirroot.'/course/lib.php');
 
-        $modinfo = get_fast_modinfo($course);
-        $modfullnames = array();
+		//if we do not have a course object, get one.
+		if(!$this->course){
+			$this->course = $DB->get_record('course', array('id'=>$this->courseid));
+		}
+		
+        $modinfo = get_fast_modinfo($this->course);
+        $homeworks = array();
 
         $archetypes = array();
+		
+		$livehomeworks = $this->block_homework_get_live_homeworks($this->courseid,$groupid);
+		if(!$livehomeworks){
+			return $homeworks;
+		}
 
         foreach($modinfo->cms as $cm) {
+			$onehomework = new stdClass();
             // Exclude activities which are not visible or have no link (=label)
             if (!$cm->uservisible or !$cm->has_view()) {
                 continue;
             }
-            if (array_key_exists($cm->modname, $modfullnames)) {
+            if (array_key_exists($cm->modname, $homeworks)) {
                 continue;
             }
-            if (!array_key_exists($cm->modname, $archetypes)) {
-                $archetypes[$cm->modname] = plugin_supports('mod', $cm->modname, FEATURE_MOD_ARCHETYPE, MOD_ARCHETYPE_OTHER);
-            }
-            if ($archetypes[$cm->modname] == MOD_ARCHETYPE_RESOURCE) {
-                if (!array_key_exists('resources', $modfullnames)) {
-                    $modfullnames['resources'] = get_string('resources');
-                }
-            } else {
-                $modfullnames[$cm->modname] = $cm->modplural;
-            }
+			
+			//loop through live homework and continue if its not there.
+			$cm_is_livehomework=false;
+			foreach($livehomeworks as $livehomework){
+				if ($livehomework->cmid == $cm->id){
+					$cm_is_livehomework=true;
+				 	$onehomework->startdate = $livehomework->startdate;
+					break;
+				}
+			}
+			if(!$cm_is_livehomework){continue;}
+			
+			//If user has completed this, we can unshow it. ie continue
+			//we will need to configure completion on SCORM object, so commenting this for now
+			if($this->activity_is_complete($cm)){
+				//continue;
+			}
+			
+			$onehomework->cm = $cm;
+			 $homeworks[] =  $onehomework;  
         }
 
-        core_collator::asort($modfullnames);
+        //core_collator::asort($homeworks);
+		
+		return $homeworks;
 
-        foreach ($modfullnames as $modname => $modfullname) {
-            if ($modname === 'resources') {
-                $icon = $OUTPUT->pix_icon('icon', '', 'mod_page', array('class' => 'icon'));
-                $this->content->items[] = '<a href="'.$CFG->wwwroot.'/course/resources.php?id='.$course->id.'">'.$icon.$modfullname.'</a>';
-            } else {
-                $icon = '<img src="'.$OUTPUT->pix_url('icon', $modname) . '" class="icon" alt="" />';
-                $this->content->items[] = '<a href="'.$CFG->wwwroot.'/mod/'.$modname.'/index.php?id='.$course->id.'">'.$icon.$modfullname.'</a>';
-            }
-        }
 
-        return $this->content;
     }
 
 }

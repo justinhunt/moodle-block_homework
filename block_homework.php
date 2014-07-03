@@ -24,6 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot . '/blocks/homework/locallib.php');
+
 class block_homework extends block_list {
 
     function init() {
@@ -31,7 +33,7 @@ class block_homework extends block_list {
     }
 
     function get_content() {
-        global $CFG, $OUTPUT, $COURSE;
+        global $CFG, $OUTPUT, $COURSE,$USER;
 
         if ($this->content !== null) {
             return $this->content;
@@ -49,12 +51,40 @@ class block_homework extends block_list {
 
         // user/index.php expect course context, so get one if page has module context.
         $currentcontext = $this->page->context->get_course_context(false);
-
+		$course = $this->page->course;
+		
+		//get our block omework helper class
+		$bmh = new block_homework_manager($this->page->course->id);
+		
+		//get group
+		$groups = groups_get_user_groups($COURSE->id, $USER->id);
+		if($groups && count($groups[0])>0 ){
+			$groupid = array_shift($groups[0]);
+			$homeworks =  $bmh->block_homework_fetch_activities($groupid);
 	
-		$url = new moodle_url('/blocks/homework/view.php', array('courseid'=>$COURSE->id,'action'=>'list','groupid'=>'0'));
-		$this->content->items[] = "<a href='" . $url->out(false). "'>" . get_string('listhomeworks','block_homework') . "</a>";
-		$url = new moodle_url('/blocks/homework/view.php', array('courseid'=>$COURSE->id,'action'=>'add','groupid'=>'0'));
-		$this->content->items[] = "<a href='" . $url->out(false). "'>" . get_string('addhomework','block_homework') . "</a>";
+			foreach ($homeworks as $onehomework) {
+
+				if ($onehomework->cm->modname === 'resources') {
+					$icon = $OUTPUT->pix_icon('icon', '', 'mod_page', array('class' => 'icon'));
+				} else {
+					$icon = '<img src="'.$OUTPUT->pix_url('icon', $onehomework->cm->modname) . '" class="icon" alt="" />';
+				}
+				$modurl = $CFG->wwwroot.'/mod/'.$onehomework->cm->modname.'/view.php?id=' . $onehomework->cm->id;
+				$this->content->items[] = userdate($onehomework->startdate,'%d %B %Y') . ' ' . html_writer::link($modurl,$icon . $onehomework->cm->name);
+				//$this->content->items[] = '<a href="'.$CFG->wwwroot.'/mod/'.$modname.'/index.php?id='.$course->id.'">'.$icon.$modfullname.'</a>';
+			}
+
+		}
+		
+
+		//If they don't have permission don't show it
+	//	if(has_capability('block/homework:managehomeworks', $currentcontext) ){
+	if(true){
+			$url = new moodle_url('/blocks/homework/view.php', array('courseid'=>$COURSE->id,'action'=>'list','groupid'=>'0'));
+			//$this->content->items[] = "<a href='" . $url->out(false). "'>" . get_string('managehomeworks','block_homework') . "</a>";
+			$this->content->items[] = html_writer::link($url, get_string('managehomeworks','block_homework'));
+		 }
+		
 
 		$this->content->footer = '';
 		return $this->content;
