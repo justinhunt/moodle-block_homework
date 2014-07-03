@@ -96,19 +96,19 @@ class block_homework_manager {
     }
 	
 	 /**
-     * Return all current homeworks for a group in a given course
+     * Return all current homeworks for a group in a given course, tht are after the start date
      * @param integer $groupid
      * @return array of course
      */
     public function block_homework_get_live_homeworks($courseid,$groupid) {
         global $DB;
-		$select = "groupid = $groupid AND courseid = $courseid AND startdate >= " . time(); //where clause
+		$select = "groupid = $groupid AND courseid = $courseid AND startdate <= " . time(); //where clause
 		$table = 'block_homework';
 		return $DB->get_records_select($table,$select);
     }
 	
 	/**
-     * Check if an activity has been completed
+     * Check if an activity has been completed(we assume for now 03/07/2014 that is "viewed"
      * @param object $cm The course module
 	 * @param integer $userid pass in to check X user, blank to use current user 
      * @return boolean true:complete false:incomplete
@@ -129,7 +129,8 @@ class block_homework_manager {
         $data = $completion->get_data($cm, false, $userid);
 
         // Is the activity already complete
-        $completed= $data->viewed == COMPLETION_VIEWED;    
+       //$completed= $data->viewed == COMPLETION_VIEWED; 
+	   $completed = $data->completionstate == COMPLETION_COMPLETE;
         return $completed;
     }
 
@@ -206,9 +207,6 @@ class block_homework_manager {
             if (!$cm->uservisible or !$cm->has_view()) {
                 continue;
             }
-            if (array_key_exists($cm->modname, $homeworks)) {
-                continue;
-            }
 			
 			//loop through live homework and continue if its not there.
 			$cm_is_livehomework=false;
@@ -222,9 +220,9 @@ class block_homework_manager {
 			if(!$cm_is_livehomework){continue;}
 			
 			//If user has completed this, we can unshow it. ie continue
-			//we will need to configure completion on SCORM object, so commenting this for now
+			//we will need to configure completion on SCORM object
 			if($this->activity_is_complete($cm)){
-				//continue;
+				continue;
 			}
 			
 			$onehomework->cm = $cm;
