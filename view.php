@@ -253,46 +253,13 @@ switch($action){
 	echo show_buttons($groupid, $groupname);
 	echo $OUTPUT->footer();
 		
-/*
-$hubselectorform->display();
-if (!empty($errormessage)) {
-    echo $errormessage;
-}
-*/
 
-//load javascript
-/*
-$commentedcourseids = array(); //result courses with comments only
-$courseids = array(); //all result courses
-$courseimagenumbers = array(); //number of screenshots of all courses (must be exact same order than $courseids)
-if (!empty($courses)) {
-    foreach ($courses as $course) {
-        if (!empty($course['comments'])) {
-            $commentedcourseids[] = $course['id'];
-        }
-        $courseids[] = $course['id'];
-        $courseimagenumbers[] = $course['screenshots'];
-    }
-}
-$PAGE->requires->yui_module('moodle-block_community-comments', 'M.blocks_community.init_comments',
-        array(array('commentids' => $commentedcourseids, 'closeButtonTitle' => get_string('close', 'editor'))));
-$PAGE->requires->yui_module('moodle-block_community-imagegallery', 'M.blocks_community.init_imagegallery',
-        array(array('imageids' => $courseids, 'imagenumbers' => $courseimagenumbers,
-                'huburl' => $huburl, 'closeButtonTitle' => get_string('close', 'editor'))));
-
-echo highlight($search, $renderer->course_list($courses, $huburl, $courseid));
-
-//display givememore/Next link if more course can be displayed
-if (!empty($courses)) {
-    if (($options->givememore + count($courses)) < $coursetotal) {
-        $fromformdata['givememore'] = count($courses) + $options->givememore;
-        $fromformdata['executesearch'] = true;
-        $fromformdata['sesskey'] = sesskey();
-        echo $renderer->next_button($fromformdata);
-    }
-}
-*/
-
+/**
+ * Return the add list buttons at bottom of table (ugly
+ * @param integer $groupid
+ * @param integer $groupname
+ * @return string html of buttons
+ */
 function show_buttons($groupid,$groupname){
 	global $COURSE;
 	
@@ -303,6 +270,13 @@ function show_buttons($groupid,$groupname){
 
 }
 
+/**
+ * Return the html table of homeworks for a group  / course
+ * @param array homework objects
+ * @param integer $courseid
+ * @param integer $groupid
+ * @return string html of table
+ */
 function show_homework_list($homeworkdatas,$courseid,$groupid){
 
 	global $COURSE;
@@ -321,26 +295,13 @@ function show_homework_list($homeworkdatas,$courseid,$groupid){
 	
 	$modinfo = get_fast_modinfo($COURSE);
 
+	//sort by start date
+    core_collator::asort_objects_by_property($homeworkdatas,'startdate',core_collator::SORT_NUMERIC);
 
+	//loop through the homoworks and add to table
 	foreach ($homeworkdatas as $hwork) {
 		$row = new html_table_row();
-		//$row->attributes['class'] = 'type-' . $plugin->type . ' name-' . $plugin->type . '_' . $plugin->name;
-		/*
-		if ($this->page->theme->resolve_image_location('icon', $plugin->type . '_' . $plugin->name)) {
-			$icon = $this->output->pix_icon('icon', '', $plugin->type . '_' . $plugin->name, array('class' => 'icon pluginicon'));
-		} else {
-			$icon = $this->output->pix_icon('spacer', '', 'moodle', array('class' => 'icon pluginicon noicon'));
-		}
-		$status = $plugin->get_status();
-		$row->attributes['class'] .= ' status-'.$status;
-		if ($status === core_plugin_manager::PLUGIN_STATUS_MISSING) {
-			$msg = html_writer::tag('span', get_string('status_missing', 'core_plugin'), array('class' => 'statusmsg'));
-		} else if ($status === core_plugin_manager::PLUGIN_STATUS_NEW) {
-			$msg = html_writer::tag('span', get_string('status_new', 'core_plugin'), array('class' => 'statusmsg'));
-		} else {
-			$msg = '';
-		}
-		*/
+		
 		
 		$startdatecell = new html_table_cell(userdate($hwork->startdate,'%d %B %Y'));
 		

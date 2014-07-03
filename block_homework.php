@@ -53,14 +53,11 @@ class block_homework extends block_list {
         $currentcontext = $this->page->context->get_course_context(false);
 		$course = $this->page->course;
 		
-		//get our block omework helper class
-		$bmh = new block_homework_manager($this->page->course->id);
-		
 		//get group
-		$groups = groups_get_user_groups($COURSE->id, $USER->id);
+		$groups = groups_get_user_groups($COURSE->id, $USER->id); 
 		if($groups && count($groups[0])>0 ){
-			$groupid = array_shift($groups[0]);
-			$homeworks =  $bmh->block_homework_fetch_activities($groupid);
+			$groupid = array_pop($groups[0]);
+			$homeworks =  block_homework_fetch_homework_activities($course, $groupid, true);
 	
 			foreach ($homeworks as $onehomework) {
 
@@ -78,8 +75,7 @@ class block_homework extends block_list {
 		
 
 		//If they don't have permission don't show it
-	//	if(has_capability('block/homework:managehomeworks', $currentcontext) ){
-	if(true){
+		if(has_capability('block/homework:managehomeworks', $currentcontext) ){
 			$url = new moodle_url('/blocks/homework/view.php', array('courseid'=>$COURSE->id,'action'=>'list','groupid'=>'0'));
 			//$this->content->items[] = "<a href='" . $url->out(false). "'>" . get_string('managehomeworks','block_homework') . "</a>";
 			$this->content->items[] = html_writer::link($url, get_string('managehomeworks','block_homework'));
@@ -89,23 +85,6 @@ class block_homework extends block_list {
 		$this->content->footer = '';
 		return $this->content;
 		
-        if (! empty($this->config->text)) {
-            $this->content->text = $this->config->text;
-        }
-
-        $this->content = '';
-        if (empty($currentcontext)) {
-            return $this->content;
-        }
-        if ($this->page->course->id == SITEID) {
-            $this->context->text .= "site context";
-        }
-
-        if (! empty($this->config->text)) {
-            $this->content->text .= $this->config->text;
-        }
-
-        return $this->content;
     }
 
     // my moodle can only have SITEID and it's redundant here, so take it away

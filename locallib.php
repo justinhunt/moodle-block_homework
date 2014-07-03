@@ -24,6 +24,8 @@
  *
  *
  */
+ 
+require_once($CFG->dirroot . '/blocks/homework/lib.php');
 
 class block_homework_manager {
 
@@ -37,7 +39,7 @@ class block_homework_manager {
 	function block_homework_manager($courseid=0) {
 		global $COURSE;
 		if($courseid){
-        $this->courseid=$courseid;
+			$this->courseid=$courseid;
 		}else{
 			$this->courseid = $COURSE->id; 
 			$this->course = $COURSE;
@@ -95,49 +97,10 @@ class block_homework_manager {
         return $DB->get_records('block_homework', array('groupid' => $groupid,'courseid'=>$courseid));
     }
 	
-	 /**
-     * Return all current homeworks for a group in a given course, tht are after the start date
-     * @param integer $groupid
-     * @return array of course
-     */
-    public function block_homework_get_live_homeworks($courseid,$groupid) {
-        global $DB;
-		$select = "groupid = $groupid AND courseid = $courseid AND startdate <= " . time(); //where clause
-		$table = 'block_homework';
-		return $DB->get_records_select($table,$select);
-    }
-	
-	/**
-     * Check if an activity has been completed(we assume for now 03/07/2014 that is "viewed"
-     * @param object $cm The course module
-	 * @param integer $userid pass in to check X user, blank to use current user 
-     * @return boolean true:complete false:incomplete
-     */
-	public function activity_is_complete($cm, $userid = 0){
-        global $USER,$DB;
-		if($userid==0){
-			$userid=$USER->id;
-		}
-		
-		//if we do not have a course object, get one.
-		if(!$this->course){
-			$this->course = $DB->get_record('course', array('id'=>$this->courseid));
-		}
-        
-		// Get current completion state
-        $completion = new completion_info($this->course);
-        $data = $completion->get_data($cm, false, $userid);
-
-        // Is the activity already complete
-       //$completed= $data->viewed == COMPLETION_VIEWED; 
-	   $completed = $data->completionstate == COMPLETION_COMPLETE;
-        return $completed;
-    }
 
     /**
      * Return a single homework
-     * @param integer $groupid
-     * @param integer $cmid
+     * @param integer $homeworkid
      * @return array of course
      */
     public function block_homework_get_homework($homeworkid) {
@@ -146,94 +109,27 @@ class block_homework_manager {
                 array('id' => $homeworkid));
     }
 
-
-
     /**
      * Delete a homework
-     * @param integer $groupid
-     * @param integer $cmid
+     * @param integer $homeworkid
      * @return bool true
      */
     public function block_homework_delete_homework($homeworkid) {
-        global $DB, $USER;
+        global $DB;
         return $DB->delete_records('block_homework',
                 array('id' => $homeworkid));
     }
 	
+	/*
+     * Get all the groups
+     * @param integer $homeworkid
+     * @return array all the groups
+     */
 	function block_homework_get_grouplist(){
-		global $USER;
 		$groups = groups_get_all_groups($this->courseid);
 		return $groups;
 	}
 	
-	/**
-	 * course_content_deleted event handler
-	 *
-	 * @param \core\event\course_content_deleted $event The event.
-	 * @return void
-	 */
-	function block_homework_handle_activity_deletion(\core\event\course_content_deleted $event) {
-		global $DB;
-		$DB->delete_records('block_homework', array('cmid' => $event->contextinstanceid));
-	}
 
-	/**
-     * Fetch all (visible) activities in course for use in a list 
-     * @return bool true
-     */
-	  function block_homework_fetch_activities($groupid = 0) {
-        global $CFG, $DB, $OUTPUT;
-
-        require_once($CFG->dirroot.'/course/lib.php');
-
-		//if we do not have a course object, get one.
-		if(!$this->course){
-			$this->course = $DB->get_record('course', array('id'=>$this->courseid));
-		}
-		
-        $modinfo = get_fast_modinfo($this->course);
-        $homeworks = array();
-
-        $archetypes = array();
-		
-		$livehomeworks = $this->block_homework_get_live_homeworks($this->courseid,$groupid);
-		if(!$livehomeworks){
-			return $homeworks;
-		}
-
-        foreach($modinfo->cms as $cm) {
-			$onehomework = new stdClass();
-            // Exclude activities which are not visible or have no link (=label)
-            if (!$cm->uservisible or !$cm->has_view()) {
-                continue;
-            }
-			
-			//loop through live homework and continue if its not there.
-			$cm_is_livehomework=false;
-			foreach($livehomeworks as $livehomework){
-				if ($livehomework->cmid == $cm->id){
-					$cm_is_livehomework=true;
-				 	$onehomework->startdate = $livehomework->startdate;
-					break;
-				}
-			}
-			if(!$cm_is_livehomework){continue;}
-			
-			//If user has completed this, we can unshow it. ie continue
-			//we will need to configure completion on SCORM object
-			if($this->activity_is_complete($cm)){
-				continue;
-			}
-			
-			$onehomework->cm = $cm;
-			 $homeworks[] =  $onehomework;  
-        }
-
-        //core_collator::asort($homeworks);
-		
-		return $homeworks;
-
-
-    }
 
 }
