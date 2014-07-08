@@ -65,3 +65,4 @@ $string['groupnotupdated'] = 'Group could not be selected';
 $string['invalidgroupid'] = 'Invalid Group ID specified';
 $string['managehomeworks'] = 'Manage Homework Activities';
 $string['inadequatepermissions'] = 'Insufficient Permissions to Access this Page';
+$string['canceledbyuser'] = 'Canceled by user';

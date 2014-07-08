@@ -73,7 +73,8 @@ class block_homework_add_form extends moodleform {
 		$mform->addElement('hidden', 'action', 'do' . $this->action);
         $mform->setType('action', PARAM_TEXT);
 
-		$mform->addElement('submit', 'submitbutton', get_string('do' . $this->action . '_label', 'block_homework'));
+		//$mform->addElement('submit', 'submitbutton', get_string('do' . $this->action . '_label', 'block_homework'));
+		$this->add_action_buttons(true,get_string('do' . $this->action . '_label', 'block_homework'));
     }
 	
 	/*
@@ -156,7 +157,8 @@ class block_homework_delete_form extends moodleform {
         $mform->setType('action', PARAM_TEXT);
 
 		
-		$mform->addElement('submit', 'submitbutton', get_string('dodelete_label', 'block_homework'));
+		//$mform->addElement('submit', 'submitbutton', get_string('dodelete_label', 'block_homework'));
+		$this->add_action_buttons(true,get_string('dodelete_label', 'block_homework'));
 	}
 
 }
@@ -188,6 +190,7 @@ class block_homework_group_form extends moodleform {
 
 		
 		$mform->addElement('submit', 'submitbutton', get_string('dogroup_label', 'block_homework'));
+		//$this->add_action_buttons(true,get_string('dogroup_label', 'block_homework'));
 	}
 
 }

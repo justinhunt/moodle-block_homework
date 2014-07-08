@@ -48,30 +48,6 @@ $PAGE->set_pagelayout('course');
 $PAGE->set_title(get_string('listview', 'block_homework'));
 $PAGE->navbar->add(get_string('listview', 'block_homework'));
 
-/*
-$search = optional_param('search', null, PARAM_TEXT);
-
-//if no capability to search course, display an error message
-$usercansearch = has_capability('moodle/community:add', $context);
-$usercandownload = has_capability('moodle/community:download', $context);
-if (empty($usercansearch)) {
-    $notificationerror = get_string('cannotsearchcommunity', 'hub');
-} else if (!extension_loaded('xmlrpc')) {
-    $notificationerror = $OUTPUT->doc_link('admin/environment/php_extension/xmlrpc', '');
-    $notificationerror .= get_string('xmlrpcdisabledcommunity', 'hub');
-}
-if (!empty($notificationerror)) {
-    echo $OUTPUT->header();
-    echo $OUTPUT->heading(get_string('searchcommunitycourse', 'block_community'), 3, 'main');
-    echo $OUTPUT->notification($notificationerror);
-    echo $OUTPUT->footer();
-    die();
-}
-
-$communitymanager = new block_community_manager();
-*/
-
-$renderer = $PAGE->get_renderer('block_homework');
 $bmh = new block_homework_manager($courseid);
 
 // OUTPUT
@@ -177,11 +153,15 @@ switch($action){
 		$add_form = new block_homework_add_form();
 		//print_r($add_form);
 		$data = $add_form->get_data();
-		$ret = $bmh->block_homework_add_homework($data->groupid,$data->courseid,$data->cmid,$data->startdate);
-		if($ret){
-			$message = get_string('addedsuccessfully','block_homework');
+		if($data){
+			$ret = $bmh->block_homework_add_homework($data->groupid,$data->courseid,$data->cmid,$data->startdate);
+			if($ret){
+				$message = get_string('addedsuccessfully','block_homework');
+			}else{
+				$message = get_string('failedtoadd','block_homework');
+			}
 		}else{
-			$message = get_string('failedtoadd','block_homework');
+			$message = get_string('canceledbyuser','block_homework');
 		}
 		break;
 		
@@ -190,11 +170,15 @@ switch($action){
 		$edit_form = new block_homework_edit_form();
 		//print_r($add_form);
 		$data = $edit_form->get_data();
-		$ret = $bmh->block_homework_edit_homework($data->homeworkid, $data->groupid,$data->courseid,$data->cmid,$data->startdate);
-		if($ret){
-			$message = get_string('updatedsuccessfully','block_homework');
+		if($data){
+			$ret = $bmh->block_homework_edit_homework($data->homeworkid, $data->groupid,$data->courseid,$data->cmid,$data->startdate);
+			if($ret){
+				$message = get_string('updatedsuccessfully','block_homework');
+			}else{
+				$message = get_string('failedtoupdate','block_homework');
+			}
 		}else{
-			$message = get_string('failedtoupdate','block_homework');
+			$message = get_string('canceledbyuser','block_homework');
 		}
 		break;
 		
@@ -203,11 +187,15 @@ switch($action){
 		//get add form
 		$delete_form = new block_homework_delete_form();
 		$data = $delete_form->get_data();
-		$ret = $bmh->block_homework_delete_homework($data->homeworkid);
-		if($ret){
-			$message = get_string('deletedsuccessfully','block_homework');
+		if($data){
+			$ret = $bmh->block_homework_delete_homework($data->homeworkid);
+			if($ret){
+				$message = get_string('deletedsuccessfully','block_homework');
+			}else{
+				$message = get_string('failedtodelete','block_homework');
+			}
 		}else{
-			$message = get_string('failedtodelete','block_homework');
+			$message = get_string('canceledbyuser','block_homework');
 		}
 		break;
 		
@@ -261,12 +249,19 @@ switch($action){
  * @return string html of buttons
  */
 function show_buttons($groupid,$groupname){
-	global $COURSE;
-	
+	global $COURSE, $OUTPUT;
+	/*
 			$addurl = new moodle_url('/blocks/homework/view.php', array('courseid'=>$COURSE->id,'action'=>'add','groupid'=>$groupid));
 			echo '<br />' . html_writer::link($addurl,  get_string('addhomework','block_homework',$groupname) );
 			$listurl = new moodle_url('/blocks/homework/view.php', array('courseid'=>$COURSE->id,'action'=>'list','groupid'=>$groupid));
 			echo '<br />' . html_writer::link($listurl,  get_string('listhomeworks','block_homework',$groupname) );
+	*/		
+	global $OUTPUT;
+	$addurl = new moodle_url('/blocks/homework/view.php', array('courseid'=>$COURSE->id,'action'=>'add','groupid'=>$groupid));
+	$listurl = new moodle_url('/blocks/homework/view.php', array('courseid'=>$COURSE->id,'action'=>'list','groupid'=>$groupid));				
+	echo $OUTPUT->single_button($addurl,get_string('addhomework','block_homework',$groupname) );
+	//echo $OUTPUT->single_button($listurl,get_string('listhomeworks','block_homework',$groupname) );
+		
 
 }
 
