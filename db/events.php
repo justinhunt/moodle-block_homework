@@ -28,7 +28,8 @@ $observers = array(
  
     array(
         'eventname'   => '\core\event\course_content_deleted',
-		'include'	  => 'blocks/homework/lib.php',
+		'includefile'	  => '/blocks/homework/lib.php',
         'callback'    => 'block_homework_handle_activity_deletion',
+        'internal' => false
     )
 );

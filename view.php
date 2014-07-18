@@ -117,15 +117,20 @@ switch($action){
 			$hdata->homeworkid=$homeworkid;		
 			
 			$modinfo = get_fast_modinfo($parentcourse);
-			$cm = $modinfo->get_cm($hdata->cmid);
-			$hdata->activityname =$cm->name;
+			try{
+				$cm = $modinfo->get_cm($hdata->cmid);
+				$hdata->activityname =$cm->name;
+				$hdata->startdate = userdate($hdata->startdate,'%d %B %Y');
+				$deleteform->set_data($hdata);
+				$deleteform->display();
+			}catch(Exception $e){
+				block_homework_purge_old_activities();
+				error_log( 'An assigned homework has been deleted: ' .  $e->getMessage());
+				echo get_string('invalidhomeworkid', 'block_homework');
+			}
 			
-			$hdata->startdate = userdate($hdata->startdate,'%d %B %Y');
-			
-			$deleteform->set_data($hdata);
-			$deleteform->display();
 		}else{
-			echo get_string('invalidhomeworkid', 'block_homework');
+			
 		}
 
 		echo $renderer->footer();

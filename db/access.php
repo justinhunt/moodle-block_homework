@@ -53,10 +53,22 @@ defined('MOODLE_INTERNAL') || die();
 				'captype' => 'write',
 				'contextlevel' => CONTEXT_COURSE,
 				'archetypes' => array(
+					'noneditingteacher' => CAP_ALLOW,
 					'editingteacher' => CAP_ALLOW,
 					'manager' => CAP_ALLOW
 				),
 				
 				'clonepermissionsfrom' => 'moodle/site:manageblocks'
 			),
+			
+			'block/homework:seeallgroups' => array(
+				'riskbitmask' => RISK_SPAM | RISK_XSS,
+				'captype' => 'write',
+				'contextlevel' => CONTEXT_COURSE,
+				'archetypes' => array(
+					'manager' => CAP_ALLOW
+				),
+				
+				'clonepermissionsfrom' => 'moodle/site:manageblocks'
+			)
 		);

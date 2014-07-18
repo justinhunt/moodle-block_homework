@@ -106,8 +106,13 @@ class block_homework_renderer extends plugin_renderer_base {
 		
 		
 			$startdatecell = new html_table_cell(userdate($hwork->startdate,'%d %B %Y'));
-		
-			$cm = $modinfo->get_cm($hwork->cmid);
+			try{
+				$cm = $modinfo->get_cm($hwork->cmid);
+			} catch (Exception $e) {
+				block_homework_purge_old_activities();
+    			error_log( 'An assigned homework has been deleted: ' .  $e->getMessage());
+    			continue;
+			}
 			$displayname=$cm->name;
 			$activityname  = html_writer::tag('div', $displayname, array('class' => 'displayname'));
 			$activitycell  = new html_table_cell($activityname);

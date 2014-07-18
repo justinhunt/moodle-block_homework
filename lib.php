@@ -161,6 +161,16 @@ defined('MOODLE_INTERNAL') || die();
 		return get_array_of_activities($courseid);
 	}
 	
+
+/**
+ * Purge any junk from homework database. Can't get events to do this for us.
+ *
+ */
+function block_homework_purge_old_activities() {
+	global $DB;
+	$where = "cmid NOT IN (SELECT id FROM {course_modules})";
+	$DB->delete_records_select('block_homework', $where);
+}
 	
 	/**
  * Returns list of courses passedin user is enrolled in and can access
@@ -275,4 +285,5 @@ function block_homework_fetch_user_courses($userid, $limit=1) {
 	function block_homework_handle_activity_deletion(\core\event\course_content_deleted $event) {
 		global $DB;
 		$DB->delete_records('block_homework', array('cmid' => $event->contextinstanceid));
+		error_log("cid=" . $event->contextinstanceid);
 	}
