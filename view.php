@@ -49,15 +49,16 @@ $PAGE->set_title(get_string('listview', 'block_homework'));
 $PAGE->navbar->add(get_string('listview', 'block_homework'));
 
 $bmh = new block_homework_manager($courseid);
+$renderer = $PAGE->get_renderer('block_homework');
 
 // OUTPUT
-echo $OUTPUT->header();
+echo $renderer->header();
 $message=false;
 
 //only admins and editing teachers should get here really
 if(!has_capability('block/homework:managehomeworks', $context) ){
-	echo $OUTPUT->heading(get_string('inadequatepermissions', 'block_homework'), 3, 'main');
-	echo $OUTPUT->footer();
+	echo $renderer->heading(get_string('inadequatepermissions', 'block_homework'), 3, 'main');
+	echo $renderer->footer();
 	return;
  }
 
@@ -75,23 +76,24 @@ if($groupid == 0){
 
 
 switch($action){
+
 	
 	case 'add':
-		echo $OUTPUT->heading(get_string('addhomeworkheading', 'block_homework',$groupname), 3, 'main');
+		echo $renderer->heading(get_string('addhomeworkheading', 'block_homework',$groupname), 3, 'main');
 		$addform = new block_homework_add_form(null,array('groupid'=>$groupid));
 		$addform->display();
-		echo $OUTPUT->footer();
+		echo $renderer->footer();
 		return;
 	
 
 	
 	case 'edit':
-		echo $OUTPUT->heading(get_string('edithomeworkheading', 'block_homework',$groupname), 3, 'main');
+		echo $renderer->heading(get_string('edithomeworkheading', 'block_homework',$groupname), 3, 'main');
 		$editform = new block_homework_edit_form(null,array('groupid'=>$groupid));
 
 		if($homeworkid > 0){
 			$bmh = new block_homework_manager();
-			$hdata = $bmh->block_homework_get_homework($homeworkid);
+			$hdata = $bmh->get_homework($homeworkid);
 			$hdata->homeworkid=$homeworkid;
 			$editform->set_data($hdata);
 			$editform->display();
@@ -100,18 +102,18 @@ switch($action){
 		}
 		
 		
-		echo $OUTPUT->footer();
+		echo $renderer->footer();
 		return;
 		
 
 	
 	case 'delete':
-		echo $OUTPUT->heading(get_string('deletehomeworkheading', 'block_homework',$groupname), 3, 'main');
+		echo $renderer->heading(get_string('deletehomeworkheading', 'block_homework',$groupname), 3, 'main');
 		$deleteform = new block_homework_delete_form(null,array('groupid'=>$groupid));
 		
 		if($homeworkid > 0){
 			$bmh = new block_homework_manager();
-			$hdata = $bmh->block_homework_get_homework($homeworkid);
+			$hdata = $bmh->get_homework($homeworkid);
 			$hdata->homeworkid=$homeworkid;		
 			
 			$modinfo = get_fast_modinfo($parentcourse);
@@ -126,7 +128,7 @@ switch($action){
 			echo get_string('invalidhomeworkid', 'block_homework');
 		}
 
-		echo $OUTPUT->footer();
+		echo $renderer->footer();
 		return;
 		
 	case 'group':
@@ -135,16 +137,16 @@ switch($action){
 	
 		//if we have a status message, display it.
 		if($message){
-			echo $OUTPUT->heading($message,5,'main');
+			echo $renderer->heading($message,5,'main');
 		}
-		echo $OUTPUT->heading(get_string('selectgroup', 'block_homework'), 3, 'main');
+		echo $renderer->heading(get_string('selectgroup', 'block_homework'), 3, 'main');
 		$gdata = new stdClass();
 		$gdata->courseid=$courseid;
 		$gdata->groupid=$groupid;
 		$groupform = new block_homework_group_form(null,array('courseid'=>$courseid));
 		$groupform->set_data($gdata);
 		$groupform->display();
-		echo $OUTPUT->footer();
+		echo $renderer->footer();
 		return;
 
 	
@@ -154,7 +156,7 @@ switch($action){
 		//print_r($add_form);
 		$data = $add_form->get_data();
 		if($data){
-			$ret = $bmh->block_homework_add_homework($data->groupid,$data->courseid,$data->cmid,$data->startdate);
+			$ret = $bmh->add_homework($data->groupid,$data->courseid,$data->cmid,$data->startdate);
 			if($ret){
 				$message = get_string('addedsuccessfully','block_homework');
 			}else{
@@ -171,7 +173,7 @@ switch($action){
 		//print_r($add_form);
 		$data = $edit_form->get_data();
 		if($data){
-			$ret = $bmh->block_homework_edit_homework($data->homeworkid, $data->groupid,$data->courseid,$data->cmid,$data->startdate);
+			$ret = $bmh->edit_homework($data->homeworkid, $data->groupid,$data->courseid,$data->cmid,$data->startdate);
 			if($ret){
 				$message = get_string('updatedsuccessfully','block_homework');
 			}else{
@@ -188,7 +190,7 @@ switch($action){
 		$delete_form = new block_homework_delete_form();
 		$data = $delete_form->get_data();
 		if($data){
-			$ret = $bmh->block_homework_delete_homework($data->homeworkid);
+			$ret = $bmh->delete_homework($data->homeworkid);
 			if($ret){
 				$message = get_string('deletedsuccessfully','block_homework');
 			}else{
@@ -216,13 +218,13 @@ switch($action){
 
 	//if we have a status message, display it.
 	if($message){
-		echo $OUTPUT->heading($message,5,'main');
+		echo $renderer->heading($message,5,'main');
 	}
 
-	echo $OUTPUT->heading(get_string('homeworklist', 'block_homework', $groupname), 3, 'main');
+	echo $renderer->heading(get_string('homeworklist', 'block_homework', $groupname), 3, 'main');
 	
 	//group form
-	//echo $OUTPUT->heading(get_string('selectgroup', 'block_homework'), 3, 'main');
+	//echo $renderer->heading(get_string('selectgroup', 'block_homework'), 3, 'main');
 	$gdata = new stdClass();
 	$gdata->courseid=$courseid;
 	$gdata->groupid=$groupid;
@@ -232,94 +234,12 @@ switch($action){
 
 	
 	//list of homeworks for current group
-	$homeworkdata=$bmh->block_homework_get_homeworks($groupid,$courseid);
+	$homeworkdata=$bmh->get_homeworks($groupid,$courseid);
 	if($homeworkdata){
-		echo show_homework_list($homeworkdata,$courseid,$groupid);
+		$modinfo = get_fast_modinfo($parentcourse);
+		echo $renderer->show_homework_list($homeworkdata,$modinfo, $courseid,$groupid);
 	}else{
-		echo $OUTPUT->heading( get_string('nohomeworks','block_homework',$groupname),4,'main');
+		echo $renderer->heading( get_string('nohomeworks','block_homework',$groupname),4,'main');
 	}
-	echo show_buttons($groupid, $groupname);
-	echo $OUTPUT->footer();
-		
-
-/**
- * Return the add list buttons at bottom of table (ugly
- * @param integer $groupid
- * @param integer $groupname
- * @return string html of buttons
- */
-function show_buttons($groupid,$groupname){
-	global $COURSE, $OUTPUT;
-	/*
-			$addurl = new moodle_url('/blocks/homework/view.php', array('courseid'=>$COURSE->id,'action'=>'add','groupid'=>$groupid));
-			echo '<br />' . html_writer::link($addurl,  get_string('addhomework','block_homework',$groupname) );
-			$listurl = new moodle_url('/blocks/homework/view.php', array('courseid'=>$COURSE->id,'action'=>'list','groupid'=>$groupid));
-			echo '<br />' . html_writer::link($listurl,  get_string('listhomeworks','block_homework',$groupname) );
-	*/		
-	global $OUTPUT;
-	$addurl = new moodle_url('/blocks/homework/view.php', array('courseid'=>$COURSE->id,'action'=>'add','groupid'=>$groupid));
-	$listurl = new moodle_url('/blocks/homework/view.php', array('courseid'=>$COURSE->id,'action'=>'list','groupid'=>$groupid));				
-	echo $OUTPUT->single_button($addurl,get_string('addhomework','block_homework',$groupname) );
-	//echo $OUTPUT->single_button($listurl,get_string('listhomeworks','block_homework',$groupname) );
-		
-
-}
-
-/**
- * Return the html table of homeworks for a group  / course
- * @param array homework objects
- * @param integer $courseid
- * @param integer $groupid
- * @return string html of table
- */
-function show_homework_list($homeworkdatas,$courseid,$groupid){
-
-	global $COURSE;
-	
-	$table = new html_table();
-	$table->id = 'block_homework_panel';
-	$table->head = array(
-		get_string('startdate', 'block_homework'),
-		get_string('activitytitle', 'block_homework'),
-		get_string('actions', 'block_homework')
-	);
-	$table->headspan = array(1,1,2);
-	$table->colclasses = array(
-		'startdate', 'activitytitle', 'edit','delete'
-	);
-	
-	$modinfo = get_fast_modinfo($COURSE);
-
-	//sort by start date
-    core_collator::asort_objects_by_property($homeworkdatas,'startdate',core_collator::SORT_NUMERIC);
-
-	//loop through the homoworks and add to table
-	foreach ($homeworkdatas as $hwork) {
-		$row = new html_table_row();
-		
-		
-		$startdatecell = new html_table_cell(userdate($hwork->startdate,'%d %B %Y'));
-		
-		$cm = $modinfo->get_cm($hwork->cmid);
-		$displayname=$cm->name;
-		$activityname  = html_writer::tag('div', $displayname, array('class' => 'displayname'));
-		$activitycell  = new html_table_cell($activityname);
-		
-		$actionurl = '/blocks/homework/view.php';
-		$editurl = new moodle_url($actionurl, array('homeworkid'=>$hwork->id,'action'=>'edit','courseid'=>$courseid,'groupid'=>$groupid));
-		$editlink = html_writer::link($editurl, get_string('edithomeworklink', 'block_homework'));
-		$editcell = new html_table_cell($editlink);
-		
-		$deleteurl = new moodle_url($actionurl, array('homeworkid'=>$hwork->id,'action'=>'delete','courseid'=>$courseid,'groupid'=>$groupid));
-		$deletelink = html_writer::link($deleteurl, get_string('deletehomeworklink', 'block_homework'));
-		$deletecell = new html_table_cell($deletelink);
-
-		$row->cells = array(
-			$startdatecell, $activitycell, $editcell, $deletecell
-		);
-		$table->data[] = $row;
-	}
-
-    return html_writer::table($table);
-
-}
+	echo $renderer->show_buttons($courseid, $groupid, $groupname);
+	echo $renderer->footer();

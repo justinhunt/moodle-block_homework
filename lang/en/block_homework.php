@@ -66,3 +66,4 @@ $string['invalidgroupid'] = 'Invalid Group ID specified';
 $string['managehomeworks'] = 'Manage Homework Activities';
 $string['inadequatepermissions'] = 'Insufficient Permissions to Access this Page';
 $string['canceledbyuser'] = 'Canceled by user';
+$string['No homeworks yet'] = 'You have no homework';

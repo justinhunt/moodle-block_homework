@@ -33,13 +33,29 @@ class block_homework extends block_list {
     }
 
     function get_content() {
-        global $CFG, $OUTPUT, $COURSE,$USER;
+        global $CFG, $COURSE,$USER;
+        
+        //try to get the homework course the user is enrolled in for My Moodle page
+        //If a user is on more than one course, there will need to be some change to this
+        //global $COURSE should work though, if in the course itself
+        if(!$COURSE || $COURSE->id<2){
+        	$homeworkcourses = block_homework_fetch_user_courses($USER->id,10);
+        	if(count($homeworkcourses) > 0){
+        		$homeworkcourse = array_pop($homeworkcourses);
+        	}else{
+        		$homeworkcourse = false;
+        	}
+        }else{
+        	$homeworkcourse = $COURSE;
+        }
+
 
         if ($this->content !== null) {
             return $this->content;
         }
 
-        if (empty($this->instance)) {
+		// if we are not an instance, or there is no enroled course, can out
+        if (empty($this->instance) || !$homeworkcourse) {
             $this->content = '';
             return $this->content;
         }
@@ -52,33 +68,27 @@ class block_homework extends block_list {
         // user/index.php expect course context, so get one if page has module context.
         $currentcontext = $this->page->context->get_course_context(false);
 		$course = $this->page->course;
+		$renderer = $this->page->get_renderer('block_homework');
 		
 		//get group
-		$groups = groups_get_user_groups($COURSE->id, $USER->id); 
+		$groups = groups_get_user_groups($homeworkcourse->id, $USER->id); 
 		if($groups && count($groups[0])>0 ){
 			$groupid = array_pop($groups[0]);
-			$homeworks =  block_homework_fetch_homework_activities($course, $groupid, true);
-	
-			foreach ($homeworks as $onehomework) {
-
-				if ($onehomework->cm->modname === 'resources') {
-					$icon = $OUTPUT->pix_icon('icon', '', 'mod_page', array('class' => 'icon'));
-				} else {
-					$icon = '<img src="'.$OUTPUT->pix_url('icon', $onehomework->cm->modname) . '" class="icon" alt="" />';
+			$homeworks =  block_homework_fetch_homework_activities($homeworkcourse, $groupid, true);
+			if(count($homeworks)>0){
+				foreach ($homeworks as $onehomework) {
+					$homeworkitem = $renderer->fetch_homework_item($onehomework);
+					$this->content->items[] = $homeworkitem;
 				}
-				$modurl = $CFG->wwwroot.'/mod/'.$onehomework->cm->modname.'/view.php?id=' . $onehomework->cm->id;
-				$this->content->items[] = userdate($onehomework->startdate,'%d %B %Y') . ' ' . html_writer::link($modurl,$icon . $onehomework->cm->name);
-				//$this->content->items[] = '<a href="'.$CFG->wwwroot.'/mod/'.$modname.'/index.php?id='.$course->id.'">'.$icon.$modfullname.'</a>';
+			}else{
+				$this->content->items[] = get_string('nohomeworksyet','block_homework');
 			}
 
-		}
-		
+		}	
 
-		//If they don't have permission don't show it
-		if(has_capability('block/homework:managehomeworks', $currentcontext) ){
-			$url = new moodle_url('/blocks/homework/view.php', array('courseid'=>$COURSE->id,'action'=>'list','groupid'=>'0'));
-			//$this->content->items[] = "<a href='" . $url->out(false). "'>" . get_string('managehomeworks','block_homework') . "</a>";
-			$this->content->items[] = html_writer::link($url, get_string('managehomeworks','block_homework'));
+		//If they don't have permission don't show the manage homework link
+		if($currentcontext && has_capability('block/homework:managehomeworks', $currentcontext) ){
+			$this->content->items[] = $renderer->fetch_manage_homeworks_item($homeworkcourse->id, 0);
 		 }
 		
 
@@ -86,10 +96,12 @@ class block_homework extends block_list {
 		return $this->content;
 		
     }
+    
 
     // my moodle can only have SITEID and it's redundant here, so take it away
     public function applicable_formats() {
         return array('all' => false,
+        			'my'=>true,
                      'site' => true,
                      'site-index' => true,
                      'course-view' => true, 

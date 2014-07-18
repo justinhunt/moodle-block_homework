@@ -109,7 +109,7 @@ class block_homework_edit_form extends block_homework_add_form {
 		$homeworkid=$this->_customdata['homeworkid'];
 		if($homeworkid > 0){
 			$bmh = new block_homework_manager();
-			$hdata = $bmh->block_homework_get_homework($homeworkid);
+			$hdata = $bmh->get_homework($homeworkid);
 		}
 
 			$mform =& $this->_form;
@@ -174,7 +174,7 @@ class block_homework_group_form extends moodleform {
 		$mform->addElement('hidden', 'courseid', 0);
         $mform->setType('courseid', PARAM_INT);
 		
-		$groups = $bmh->block_homework_get_grouplist();
+		$groups = $bmh->get_grouplist();
 		$options =array();
 		foreach($groups as $group){
 			$options[$group->id] = $group->name;

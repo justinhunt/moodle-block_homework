@@ -52,10 +52,10 @@ class block_homework_manager {
      * @param integer course module id
      * @return id of homework or false if already added
      */
-    public function block_homework_add_homework($groupid, $courseid, $cmid, $startdate) {
+    public function add_homework($groupid, $courseid, $cmid, $startdate) {
         global $DB,$USER;
 
-       // $homework = $this->block_homework_get_homework($groupid, $cmid);
+       // $homework = $this->get_homework($groupid, $cmid);
         if (empty($homework)) {
             $homework = new stdClass();
             $homework->groupid = $groupid;
@@ -69,7 +69,7 @@ class block_homework_manager {
         }
     }
 	
-	public function block_homework_edit_homework($homeworkid, $groupid, $courseid, $cmid, $startdate) {
+	public function edit_homework($homeworkid, $groupid, $courseid, $cmid, $startdate) {
         global $DB,$USER;
 
             $homework = new stdClass();
@@ -92,7 +92,7 @@ class block_homework_manager {
      * @param integer $groupid
      * @return array of course
      */
-    public function block_homework_get_homeworks($groupid, $courseid) {
+    public function get_homeworks($groupid, $courseid) {
         global $DB;
         return $DB->get_records('block_homework', array('groupid' => $groupid,'courseid'=>$courseid));
     }
@@ -103,7 +103,7 @@ class block_homework_manager {
      * @param integer $homeworkid
      * @return array of course
      */
-    public function block_homework_get_homework($homeworkid) {
+    public function get_homework($homeworkid) {
         global $DB;
         return $DB->get_record('block_homework',
                 array('id' => $homeworkid));
@@ -114,7 +114,7 @@ class block_homework_manager {
      * @param integer $homeworkid
      * @return bool true
      */
-    public function block_homework_delete_homework($homeworkid) {
+    public function delete_homework($homeworkid) {
         global $DB;
         return $DB->delete_records('block_homework',
                 array('id' => $homeworkid));
@@ -125,7 +125,7 @@ class block_homework_manager {
      * @param integer $homeworkid
      * @return array all the groups
      */
-	function block_homework_get_grouplist(){
+	function get_grouplist(){
 		$groups = groups_get_all_groups($this->courseid);
 		return $groups;
 	}
