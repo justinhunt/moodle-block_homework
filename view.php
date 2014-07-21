@@ -36,7 +36,8 @@ require_login();
 $courseid = required_param('courseid', PARAM_INT); //if no courseid is given
 $action = required_param('action', PARAM_TEXT); //the user action to take
 $groupid =  optional_param('groupid',0, PARAM_INT); //the id of the group
-$homeworkid =  optional_param('homeworkid',0, PARAM_INT); //the id of the group
+$homeworkid =  optional_param('homeworkid',0, PARAM_INT); //the id of the homework activity
+$activityid =  optional_param('activityid',0, PARAM_INT); //the id of the activity (cmid)
 
 $parentcourse = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
 
@@ -63,20 +64,31 @@ if(!has_capability('block/homework:managehomeworks', $context) ){
  }
 
 
-//don't do anything without a groupid
-if($groupid == 0){
-	$action='group';
-}else{		
-	$groupname = groups_get_group_name($groupid);
-	if(!$groupname){
-		$message = get_string('invalidgroupid','block_homework');
+//don't do anything without a groupid (unless we are quick adding...)
+if($action!='quickadd'){
+	if($groupid == 0){
 		$action='group';
+	}else{		
+		$groupname = groups_get_group_name($groupid);
+		if(!$groupname){
+			$message = get_string('invalidgroupid','block_homework');
+			$action='group';
+		}
 	}
 }
 
 
 switch($action){
 
+	case 'quickadd':
+		echo $renderer->heading(get_string('quickaddhomeworkheading', 'block_homework'), 3, 'main');
+		$quickadddata = new stdClass();
+		$quickadddata->cmid=$activityid;
+		$quickaddform = new block_homework_quickadd_form(null,array('cmid'=>$activityid));
+		$quickaddform->set_data($quickadddata);
+		$quickaddform->display();
+		echo $renderer->footer();
+		return;
 	
 	case 'add':
 		echo $renderer->heading(get_string('addhomeworkheading', 'block_homework',$groupname), 3, 'main');
@@ -84,8 +96,6 @@ switch($action){
 		$addform->display();
 		echo $renderer->footer();
 		return;
-	
-
 	
 	case 'edit':
 		echo $renderer->heading(get_string('edithomeworkheading', 'block_homework',$groupname), 3, 'main');
@@ -100,8 +110,6 @@ switch($action){
 		}else{
 			echo get_string('invalidhomeworkid', 'block_homework');
 		}
-		
-		
 		echo $renderer->footer();
 		return;
 		
@@ -160,6 +168,23 @@ switch($action){
 		$add_form = new block_homework_add_form();
 		//print_r($add_form);
 		$data = $add_form->get_data();
+		if($data){
+			$ret = $bmh->add_homework($data->groupid,$data->courseid,$data->cmid,$data->startdate);
+			if($ret){
+				$message = get_string('addedsuccessfully','block_homework');
+			}else{
+				$message = get_string('failedtoadd','block_homework');
+			}
+		}else{
+			$message = get_string('canceledbyuser','block_homework');
+		}
+		break;
+		
+	case 'doquickadd':
+		//get add form
+		$quickadd_form = new block_homework_quickadd_form();
+		//print_r($add_form);
+		$data = $quickadd_form->get_data();
 		if($data){
 			$ret = $bmh->add_homework($data->groupid,$data->courseid,$data->cmid,$data->startdate);
 			if($ret){

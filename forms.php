@@ -31,6 +31,61 @@
 require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->dirroot . '/course/lib.php');
 
+
+
+class block_homework_quickadd_form extends moodleform {
+	
+	protected $action = 'quickadd';
+	
+    public function definition() {
+        global $CFG, $USER, $OUTPUT, $COURSE;
+        $strrequired = get_string('required');
+        $mform = & $this->_form;
+		
+		
+		//Activity Information
+		$mods = get_array_of_activities($COURSE->id);
+		$cmid = $this->_customdata['cmid'];
+		$activityname ='';
+		if($cmid){
+			$activityname =$mods[$cmid]->name;
+		 }
+        $mform->addElement('static', 'activityname',  '',get_string('activitystyle','block_homework',$activityname));
+        $mform->addElement('hidden', 'cmid', 0);
+        $mform->setType('cmid', PARAM_INT);
+        
+		
+		//show a group form
+		$bmh = new block_homework_manager($COURSE->id);
+		$groups = $bmh->get_grouplist();
+		$options =array();
+		foreach($groups as $group){
+			$options[$group->id] = $group->name;
+		}
+		$mform->addElement('select', 'groupid', get_string('selectgroup','block_homework'),$options);
+		$mform->setType('groupid', PARAM_INT);
+
+
+        //add the start date
+        $mform->addElement('date_selector', 'startdate', get_string('startdate','block_homework'));
+        $mform->setType('startdate', PARAM_INT); //what is the type for date?
+		
+
+		$mform->addElement('hidden', 'homeworkid', 0);
+        $mform->setType('homeworkid', PARAM_INT);
+		
+		
+		$mform->addElement('hidden', 'courseid', $COURSE->id);
+        $mform->setType('courseid', PARAM_INT);
+		
+		$mform->addElement('hidden', 'action', 'do' . $this->action);
+        $mform->setType('action', PARAM_TEXT);
+
+		//$mform->addElement('submit', 'submitbutton', get_string('do' . $this->action . '_label', 'block_homework'));
+		$this->add_action_buttons(true,get_string('do' . $this->action . '_label', 'block_homework', $activityname));
+    }
+}
+
 class block_homework_add_form extends moodleform {
 	
 	protected $action = 'add';
@@ -41,10 +96,7 @@ class block_homework_add_form extends moodleform {
         $mform = & $this->_form;
 
 		$groupid = $this->_customdata['groupid'];
-		//$groupname = groups_get_group_name($groupid);
-		
-		
-       // $mform->addElement('header', 'site', get_string($this->action . 'homeworkheading', 'block_homework',$groupname));
+
 
         //add the course id (of the context)
         $mform->addElement('date_selector', 'startdate', get_string('startdate','block_homework'));

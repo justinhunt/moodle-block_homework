@@ -70,13 +70,19 @@ class block_homework extends block_list {
 		$course = $this->page->course;
 		$renderer = $this->page->get_renderer('block_homework');
 		
+		//this array is for Javascript
+		$currenthomeworks = array();
+		
 		//get group
 		$groups = groups_get_user_groups($homeworkcourse->id, $USER->id); 
 		if($groups && count($groups[0])>0 ){
 			$groupid = array_pop($groups[0]);
-			$homeworks =  block_homework_fetch_homework_activities($homeworkcourse, $groupid, true);
+			$todoonly = true;
+			$homeworks =  block_homework_fetch_homework_activities($homeworkcourse, $groupid, $todoonly);
+			
 			if(count($homeworks)>0){
 				foreach ($homeworks as $onehomework) {
+					$currenthomeworks[$onehomework->cm->id] = $onehomework->cm->id; 
 					$homeworkitem = $renderer->fetch_homework_item($onehomework);
 					$this->content->items[] = $homeworkitem;
 				}
@@ -85,14 +91,35 @@ class block_homework extends block_list {
 			}
 
 		}	
+		
+		//We need this so that we can require json,panel and transition yui libs
+		$jsmodule = array(
+			'name'     => 'block_homework',
+			'fullpath' => '/blocks/homework/module.js',
+			'requires' => array('moodle-course-dragdrop')
+		);
+		$options=array();
+		$options['courseid'] = $homeworkcourse->id;
+		$options['currenthomeworks'] = $currenthomeworks;
+  
+	   $this->page->requires->strings_for_js(
+				array('yes', 'no', 'ok', 'cancel', 'error', 'edit', 'move', 'delete', 'movehere'),
+				'moodle'
+				);
+		$this->page->requires->strings_for_js(
+				array('addtohomework'),
+				'block_homework'
+				);
+				
+		//setup our JS call
+		$this->page->requires->js_init_call('M.block_homework.init', array($options),false,$jsmodule);
+
 
 		//If they don't have permission don't show the manage homework link
 		if($currentcontext && has_capability('block/homework:managehomeworks', $currentcontext) ){
 			$this->content->items[] = $renderer->fetch_manage_homeworks_item($homeworkcourse->id, 0);
 		 }
-		
 
-		$this->content->footer = '';
 		return $this->content;
 		
     }
