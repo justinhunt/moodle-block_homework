@@ -22,8 +22,8 @@
  * It also handles adding a course to the community block.
  * It also handles downloading a course template.
  *
- * @package    block_community
- * @author     Jerome Mouneyrac <jerome@mouneyrac.com>
+ * @package    block_homework
+ * @author     Justin Hunt 
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL
  * @copyright  (C) 1999 onwards Martin Dougiamas  http://dougiamas.com
  */
