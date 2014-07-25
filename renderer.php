@@ -40,7 +40,13 @@ class block_homework_renderer extends plugin_renderer_base {
 		if ($onehomework->cm->modname === 'resources') {
 			$icon = $this->output->pix_icon('icon', '', 'mod_page', array('class' => 'icon'));
 		} else {
-			$icon = '<img src="'.$this->output->pix_url('icon', $onehomework->cm->modname) . '" class="icon" alt="" />';
+			//$icon = '<img src="'.$this->output->pix_url('icon', $onehomework->cm->modname) . '" class="icon" alt="" />';
+			$icon = html_writer::tag('img','',
+				array('src'=>$this->output->pix_url('icon', $onehomework->cm->modname),
+				'class'=>'icon',
+				'alt'=>$onehomework->cm->name)
+				);
+			
 		}
 		
 		$modurl = $CFG->wwwroot.'/mod/'.$onehomework->cm->modname.'/view.php?id=' . $onehomework->cm->id;
