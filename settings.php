@@ -18,7 +18,7 @@
  * homework block caps.
  *
  * @package    block_homework
- * @copyright  Daniel Neis <danielneis@gmail.com>
+ * @copyright  Justin Hunt <poodllsupport@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

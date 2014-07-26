@@ -34,13 +34,12 @@ class block_homework_renderer extends plugin_renderer_base {
 	 * @param object homework object
 	 * @return string html of item
 	 */
-    public function fetch_homework_item($onehomework){	
+    public function fetch_homework_item($onehomework,$parentmode=false){	
     	global $CFG;
     
 		if ($onehomework->cm->modname === 'resources') {
 			$icon = $this->output->pix_icon('icon', '', 'mod_page', array('class' => 'icon'));
 		} else {
-			//$icon = '<img src="'.$this->output->pix_url('icon', $onehomework->cm->modname) . '" class="icon" alt="" />';
 			$icon = html_writer::tag('img','',
 				array('src'=>$this->output->pix_url('icon', $onehomework->cm->modname),
 				'class'=>'icon',
@@ -49,11 +48,15 @@ class block_homework_renderer extends plugin_renderer_base {
 			
 		}
 		
-		$modurl = $CFG->wwwroot.'/mod/'.$onehomework->cm->modname.'/view.php?id=' . $onehomework->cm->id;
 		$displaydate = userdate($onehomework->startdate,'%d %B %Y'); 
-		$displaylink = html_writer::link($modurl,$icon . $onehomework->cm->name);
+		if(!$parentmode){
+			$modurl = $CFG->wwwroot.'/mod/'.$onehomework->cm->modname.'/view.php?id=' . $onehomework->cm->id;
+			$displaystuff = html_writer::link($modurl,$icon . $onehomework->cm->name);
+		}else{
+			$displaystuff = html_writer::span($icon . $onehomework->cm->name);
+		}
 		
-		$homeworkitem = $displaydate . ' ' . $displaylink;
+		$homeworkitem = $displaydate . ' ' . $displaystuff;
 		return $homeworkitem;
     }
     

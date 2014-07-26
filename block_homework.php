@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/blocks/homework/locallib.php');
+require_once($CFG->dirroot . '/local/family/lib.php');
 
 class block_homework extends block_list {
 
@@ -33,7 +34,7 @@ class block_homework extends block_list {
     }
 
     function get_content() {
-        global $CFG, $COURSE,$USER;
+        global $CFG, $COURSE,$USER, $DB;
         
         //try to get the homework course the user is enrolled in for My Moodle page
         //If a user is on more than one course, there will need to be some change to this
@@ -48,8 +49,21 @@ class block_homework extends block_list {
         }else{
         	$homeworkcourse = $COURSE;
         }
-
-
+		
+		//Get the homework user.
+		$childid =  optional_param('childid',0, PARAM_INT); //the userid of the user whose homework we are showing		
+		$homeworkuser = false;
+		if($childid && local_family_is_users_child($childid)){
+			$homeworkuser = $DB->get_record('user',array('id'=>$childid));
+		}else{
+			$homeworkuser = $USER;
+		}
+		if(!$homeworkuser){return;}
+		
+		//if we are logged in as a user who is NOT the child we set parentmode. to deactivate links
+		$parentmode=!($homeworkuser->id==$USER->id);
+		
+		
         if ($this->content !== null) {
             return $this->content;
         }
@@ -74,7 +88,7 @@ class block_homework extends block_list {
 		$currenthomeworks = array();
 		
 		//get group
-		$groups = groups_get_user_groups($homeworkcourse->id, $USER->id); 
+		$groups = groups_get_user_groups($homeworkcourse->id, $homeworkuser->id); 
 		if($groups && count($groups[0])>0 ){
 			$groupid = array_pop($groups[0]);
 			$todoonly = true;
@@ -83,7 +97,7 @@ class block_homework extends block_list {
 			if(count($homeworks)>0){
 				foreach ($homeworks as $onehomework) {
 					$currenthomeworks[$onehomework->cm->id] = $onehomework->cm->id; 
-					$homeworkitem = $renderer->fetch_homework_item($onehomework);
+					$homeworkitem = $renderer->fetch_homework_item($onehomework,$parentmode);
 					$this->content->items[] = $homeworkitem;
 				}
 			}else{
@@ -92,7 +106,7 @@ class block_homework extends block_list {
 
 		}	
 		
-		//We need this so that we can require json,panel and transition yui libs
+		//We need this so that we can require course libraries in js
 		$jsmodule = array(
 			'name'     => 'block_homework',
 			'fullpath' => '/blocks/homework/module.js',

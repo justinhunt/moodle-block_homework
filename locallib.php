@@ -30,20 +30,31 @@ require_once($CFG->dirroot . '/blocks/homework/lib.php');
 class block_homework_manager {
 
 	private $courseid=0;
+	private $userid=0;
 	private $course=null;
+	private $user=null;
 	
 	/**
      * constructor. make sure we have the right course
      * @param integer courseid id
 	*/
-	function block_homework_manager($courseid=0) {
-		global $COURSE;
+	function block_homework_manager($courseid=0,$userid=0) {
+		global $COURSE,$USER, $DB;
 		if($courseid){
 			$this->courseid=$courseid;
 		}else{
 			$this->courseid = $COURSE->id; 
 			$this->course = $COURSE;
 		}
+		
+		if($userid){
+			$this->userid=$userid;
+			$this->user=$DB->get_record('user',array('id'=>$userid));
+		}else{
+			$this->userid=$USER->id;
+			$this->user = $USER;
+		}
+		
     }
 
     /**
@@ -128,7 +139,6 @@ class block_homework_manager {
      * @return array all the groups
      */
 	function get_grouplist(){
-		global $USER;
 		$context = context_course::instance($this->courseid);
 		$groups = groups_get_all_groups($this->courseid);
 		//If they are an admin, let them see all the groups
@@ -136,7 +146,7 @@ class block_homework_manager {
 			return $groups;
 		 }else{
 			//this user's groups
-			$grouping = groups_get_user_groups($this->courseid, $USER->id);
+			$grouping = groups_get_user_groups($this->courseid, $this->userid);
 			if($grouping && count($grouping)>0){
 				$returngroups = array();
 				foreach($grouping[0]  as $gpid=>$gpval){

@@ -56,7 +56,7 @@ class block_homework_quickadd_form extends moodleform {
         
 		
 		//show a group form
-		$bmh = new block_homework_manager($COURSE->id);
+		$bmh = new block_homework_manager($COURSE->id, $USER->id);
 		$groups = $bmh->get_grouplist();
 		$options =array();
 		foreach($groups as $group){
@@ -221,7 +221,7 @@ class block_homework_group_form extends moodleform {
         global $CFG, $USER, $OUTPUT, $COURSE;
         $strrequired = get_string('required');
         $mform = & $this->_form;
-		$bmh = new block_homework_manager($this->_customdata['courseid']);
+		$bmh = new block_homework_manager($this->_customdata['courseid'], $USER->id);
 
 		$mform->addElement('hidden', 'courseid', 0);
         $mform->setType('courseid', PARAM_INT);
