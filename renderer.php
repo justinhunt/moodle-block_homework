@@ -56,7 +56,8 @@ class block_homework_renderer extends plugin_renderer_base {
 			$displaystuff = html_writer::span($icon . $onehomework->cm->name);
 		}
 		
-		$homeworkitem = $displaydate . ' ' . $displaystuff;
+		//$homeworkitem = $displaydate . ' ' . $displaystuff;
+		$homeworkitem = $displaystuff;
 		return $homeworkitem;
     }
     
