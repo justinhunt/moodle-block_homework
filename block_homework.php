@@ -35,20 +35,7 @@ class block_homework extends block_list {
 
     function get_content() {
         global $CFG, $COURSE,$USER, $DB;
-        
-        //try to get the homework course the user is enrolled in for My Moodle page
-        //If a user is on more than one course, there will need to be some change to this
-        //global $COURSE should work though, if in the course itself
-        if(!$COURSE || $COURSE->id<2){
-        	$homeworkcourses = block_homework_fetch_user_courses($USER->id,10);
-        	if(count($homeworkcourses) > 0){
-        		$homeworkcourse = array_pop($homeworkcourses);
-        	}else{
-        		$homeworkcourse = false;
-        	}
-        }else{
-        	$homeworkcourse = $COURSE;
-        }
+		
 		
 		//Get the homework user.
 		$childid =  optional_param('childid',0, PARAM_INT); //the userid of the user whose homework we are showing		
@@ -62,6 +49,20 @@ class block_homework extends block_list {
 		
 		//if we are logged in as a user who is NOT the child we set parentmode. to deactivate links
 		$parentmode=!($homeworkuser->id==$USER->id);
+        
+        //try to get the homework course the user is enrolled in for My Moodle page
+        //If a user is on more than one course, there will need to be some change to this
+        //global $COURSE should work though, if in the course itself
+        if(!$COURSE || $COURSE->id<2){
+        	$homeworkcourses = block_homework_fetch_user_courses($homeworkuser->id,10);
+        	if(count($homeworkcourses) > 0){
+        		$homeworkcourse = array_pop($homeworkcourses);
+        	}else{
+        		$homeworkcourse = false;
+        	}
+        }else{
+        	$homeworkcourse = $COURSE;
+        }
 		
 		
         if ($this->content !== null) {
