@@ -30,6 +30,8 @@ $string['headerconfig'] = 'Config section header';
 $string['labelfoo'] = 'Config label';
 $string['homework:addinstance'] = 'Add a homework block';
 $string['homework:myaddinstance'] = 'Add a homework block to my moodle';
+$string['homework:managehomeworks'] = 'Manage homework activities for a group(s)';
+$string['homework:seeallgroups'] = 'See homework for all groups in a course';
 $string['pluginname'] = 'homework';
 
 $string['listview'] = 'Homework Assignments';
