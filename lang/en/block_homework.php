@@ -19,7 +19,7 @@
  * Strings for component 'block_homework', language 'en'
  *
  * @package   block_homework
- * @copyright Daniel Neis <danielneis@gmail.com>
+ * @copyright Justin Hunt <poodllsupport@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -35,9 +35,9 @@ $string['homework:seeallgroups'] = 'See homework for all groups in a course';
 $string['pluginname'] = 'homework';
 
 $string['listview'] = 'Homework Assignments';
-$string['homeworklist'] = 'Homeworks for Group: {$a}';
-$string['listhomeworks'] = 'List Homeworks for Group: {$a}';
-$string['addhomework'] = 'Add a Homework for Group: {$a}';
+$string['homeworklist'] = 'Homework Activities for Group: {$a}';
+$string['listhomeworks'] = 'List Homework Activities for Group: {$a}';
+$string['addhomework'] = 'Add Homework for Group: {$a}';
 $string['homeworkactivity'] = 'Homework Activity';
 $string['startdate'] = 'Start Date';
 $string['nostartdate'] = 'No start date entered';
@@ -55,9 +55,9 @@ $string['addhomeworkheading'] = 'Add Homework for Group: {$a}';
 $string['quickaddhomeworkheading'] = 'Add Homework Activity';
 $string['deletehomeworkheading'] = 'Delete Homework for Group: {$a}';
 $string['edithomeworkheading'] = 'Edit Homework for Group: {$a}';
-$string['deletedsuccessfully'] = 'The homework was deleted successfully';
-$string['failedtodelete'] = 'Failed to delete homework. Sorry.';
-$string['updatedsuccessfully'] = 'The homework was updated successfully';
+$string['deletedsuccessfully'] = 'The homework activity was deleted successfully';
+$string['failedtodelete'] = 'Failed to delete homework activity. Sorry.';
+$string['updatedsuccessfully'] = 'The homework activity was updated successfully';
 $string['failedtoupdate'] = 'Failed to update homework. Sorry.';
 $string['actions'] = 'Actions';
 $string['activitytitle'] = 'Activity Title';
