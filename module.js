@@ -46,9 +46,16 @@ M.block_homework = {
                 	//if this is a current homework, flag it as so
            	  	    var currenthomeworks = this.opts['currenthomeworks'];
                 	if(currenthomeworks[cmid]){
-                		activity.addClass('block_homework_currenthomework');
+                		//if we are adding highlight to standard moodle course listing
+                		//activity.addClass('block_homework_currenthomework');
+                		//if we are just interested in YL scorm activities
+                		var scormicon = activity.one('#scormicon_module-' + cmid);
+                		if(scormicon){
+                			scormicon.addClass('block_homework_currenthomework');
+						}
+                		
                 	}
-                	
+                	//add the "quick add" icon to the edit menu per activity
                     var homework = this.create_homework_command(cmid);
                     var menu = activity.one('ul[role="menu"]');
                     if (menu) {
