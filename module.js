@@ -46,12 +46,16 @@ M.block_homework = {
                 	//if this is a current homework, flag it as so
            	  	    var currenthomeworks = this.opts['currenthomeworks'];
                 	if(currenthomeworks[cmid]){
-                		//if we are adding highlight to standard moodle course listing
-                		//activity.addClass('block_homework_currenthomework');
-                		//if we are just interested in YL scorm activities
+                		//depending on course layout, highlight different things
                 		var scormicon = activity.one('#scormicon_module-' + cmid);
-                		if(scormicon){
+                		var activitybox=Y.one('#scorm_activitybox_module-' + cmid);
+                		if(activitybox){
+                			activitybox.removeClass('scorm_activitybox');
+                			activitybox.addClass('block_homework_currenthomework');
+						}else if(scormicon){
                 			scormicon.addClass('block_homework_currenthomework');
+						}else if(activity){
+							activity.addClass('block_homework_currenthomework');
 						}
                 		
                 	}

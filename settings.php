@@ -24,11 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$settings->add(new admin_setting_heading('sampleheader',
-                                         get_string('headerconfig', 'block_homework'),
-                                         get_string('descconfig', 'block_homework')));
 
-$settings->add(new admin_setting_configcheckbox('homework/foo',
-                                                get_string('labelfoo', 'block_homework'),
-                                                get_string('descfoo', 'block_homework'),
-                                                '0'));
+ $modoptions = array('scorm'=>'Scorm', 'forum'=>'Forum', 'page'=>'Page', 'assign'=>'Assignment',  'wiki'=>'Wiki', 'file'=>'File', 'quiz'=>'Quiz');							
+$settings->add(new admin_setting_configmultiselect('block_homework/homeworktypes', 
+		get_string('label_homeworktypes', 'block_homework'),  
+		get_string('desc_homeworktypes', 'block_homework'), 
+		array('scorm'), $modoptions));	

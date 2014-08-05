@@ -73,3 +73,6 @@ $string['canceledbyuser'] = 'Canceled by user';
 $string['nohomeworksyet'] = 'You have no homework';
 $string['addtohomework'] = 'Add to homework';
 $string['activitystyle'] = '<h3>{$a}</h3>';
+$string['label_homeworktypes'] = 'Homework types';
+$string['desc_homeworktypes'] = 'You can choose which type of Moodle activity appears in the option list to be set as homework';
+

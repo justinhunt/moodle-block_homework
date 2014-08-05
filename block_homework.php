@@ -36,6 +36,7 @@ class block_homework extends block_list {
     function get_content() {
         global $CFG, $COURSE,$USER, $DB;
 		
+		$config = get_config('block_ratings');
 		
 		//Get the homework user.
 		$childid =  optional_param('childid',0, PARAM_INT); //the userid of the user whose homework we are showing		
@@ -49,6 +50,8 @@ class block_homework extends block_list {
 		
 		//if we are logged in as a user who is NOT the child we set parentmode. to deactivate links
 		$parentmode=!($homeworkuser->id==$USER->id);
+		//always false at the moment. Later might use to retain JS but not show block
+		$hidemode = false;
         
         //try to get the homework course the user is enrolled in for My Moodle page
         //If a user is on more than one course, there will need to be some change to this
@@ -99,10 +102,14 @@ class block_homework extends block_list {
 				foreach ($homeworks as $onehomework) {
 					$currenthomeworks[$onehomework->cm->id] = $onehomework->cm->id; 
 					$homeworkitem = $renderer->fetch_homework_item($onehomework,$parentmode);
-					$this->content->items[] = $homeworkitem;
+					if(!$hidemode){
+						$this->content->items[] = $homeworkitem;
+					}
 				}
 			}else{
-				$this->content->items[] = get_string('nohomeworksyet','block_homework');
+				if(!$hidemode){
+					$this->content->items[] = get_string('nohomeworksyet','block_homework');
+				}
 			}
 
 		}	
@@ -132,7 +139,9 @@ class block_homework extends block_list {
 
 		//If they don't have permission don't show the manage homework link
 		if($currentcontext && has_capability('block/homework:managehomeworks', $currentcontext) ){
-			$this->content->items[] = $renderer->fetch_manage_homeworks_item($homeworkcourse->id, 0);
+			if(!$hidemode){
+				$this->content->items[] = $renderer->fetch_manage_homeworks_item($homeworkcourse->id, 0);
+			}
 		 }
 
 		return $this->content;

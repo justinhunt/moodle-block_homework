@@ -105,8 +105,12 @@ class block_homework_add_form extends moodleform {
 		//is it better to use get_fast_modinfo() and get_module_types_names() ?
 		$mods = get_array_of_activities($COURSE->id);
 		$options =array();
+		$config = get_config('block_homework');
+		$homeworktypes =explode(',' ,$config->homeworktypes);
 		foreach($mods as $mod){
-			$options[$mod->cm] = $mod->name;
+			if(in_array($mod->mod,$homeworktypes)){
+				$options[$mod->cm] = $mod->name;
+			}
 		}
 		//print_r($options);
 		$mform->addElement('select', 'cmid', get_string('homeworkactivity','block_homework'),$options);

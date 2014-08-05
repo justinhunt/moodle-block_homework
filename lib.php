@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 	 * @param integer $groupid
      * @return array array of homeworkdata (startdata + cm) objects
      */
-	  function block_homework_fetch_homework_activities($course, $groupid, $todoonly, $userid=0) {
+	  function block_homework_fetch_homework_activities($course, $groupid, $todoonly, $userid=0, $limit=0) {
         global $CFG, $DB, $OUTPUT;
 
         require_once($CFG->dirroot.'/course/lib.php');
@@ -43,7 +43,7 @@ defined('MOODLE_INTERNAL') || die();
 
 		//get all the live homeworks
 		//if todoonly is false, it will return ALL the homework activities
-		$livehomeworks = block_homework_get_live_homeworks($course->id,$groupid,!$todoonly);
+		$livehomeworks = block_homework_get_live_homeworks($course->id,$groupid,!$todoonly, $limit);
 		if(!$livehomeworks){
 			return $homeworks;
 		}
@@ -93,7 +93,7 @@ defined('MOODLE_INTERNAL') || die();
 	 * @param integer $groupid
      * @return array of course
      */
-    function block_homework_get_live_homeworks($courseid,$groupid,$ignorestartdate=false) {
+    function block_homework_get_live_homeworks($courseid,$groupid,$ignorestartdate=false, $limit=0) {
         global $DB;
 		if($ignorestartdate){
 			$select = "groupid = $groupid AND courseid = $courseid"; //where clause
@@ -101,8 +101,13 @@ defined('MOODLE_INTERNAL') || die();
 			$select = "groupid = $groupid AND courseid = $courseid AND startdate <= " . time(); //where clause		
 		}
 		$table = 'block_homework';
-		return $DB->get_records_select($table,$select);
+		if($limit==0){
+			return $DB->get_records_select($table,$select);
+		}else{
+			return $DB->get_records_select($table,$select, null, 'startdate ASC','*',0,$limit);
+		}
     }
+
 	
 	/**
      * Check if an activity has been completed
