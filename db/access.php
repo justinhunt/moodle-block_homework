@@ -37,7 +37,7 @@ defined('MOODLE_INTERNAL') || die();
 			),
 
 			'block/homework:addinstance' => array(
-				'riskbitmask' => RISK_SPAM | RISK_XSS,
+				'riskbitmask' => RISK_PERSONAL,
 				'captype' => 'write',
 				'contextlevel' => CONTEXT_BLOCK,
 				'archetypes' => array(
@@ -49,7 +49,7 @@ defined('MOODLE_INTERNAL') || die();
 			),
 			
 			'block/homework:managehomeworks' => array(
-				'riskbitmask' => RISK_SPAM | RISK_XSS,
+				'riskbitmask' => RISK_PERSONAL,
 				'captype' => 'write',
 				'contextlevel' => CONTEXT_COURSE,
 				'archetypes' => array(
@@ -62,7 +62,7 @@ defined('MOODLE_INTERNAL') || die();
 			),
 			
 			'block/homework:seeallgroups' => array(
-				'riskbitmask' => RISK_SPAM | RISK_XSS,
+				'riskbitmask' => RISK_PERSONAL,
 				'captype' => 'write',
 				'contextlevel' => CONTEXT_COURSE,
 				'archetypes' => array(
