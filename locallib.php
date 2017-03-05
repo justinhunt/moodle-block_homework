@@ -38,7 +38,7 @@ class block_homework_manager {
      * constructor. make sure we have the right course
      * @param integer courseid id
 	*/
-	function block_homework_manager($courseid=0,$userid=0) {
+	function __construct($courseid=0,$userid=0) {
 		global $COURSE,$USER, $DB;
 		if($courseid){
 			$this->courseid=$courseid;
